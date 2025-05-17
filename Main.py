@@ -2,12 +2,21 @@ from tkinter import *
 import csv
 #import Func.py
 import random
-
-gris = "#808080"
+import time
 
 ventana=Tk()
 ventana.geometry("350x350")
-ventana.config(background=gris)
+ventana.config(background="#808080")
+
+
+global RespuestasRandom
+RespuestasRandom = []
+global puntos
+puntos=[]
+global preguntas
+preguntas=[]
+global respuestas
+respuestas=[]
 
 def borrar():
     PuntoLabel.destroy()
@@ -23,60 +32,169 @@ def enviarevento(event):
     with open('datos.csv', 'a', newline='') as archivo:
         DatosCSV = csv.writer(archivo, delimiter=',',quotechar='|', quoting=csv.QUOTE_MINIMAL)
         DatosCSV.writerow([punto.get()]+[pregunta.get()]+[respuesta.get()])
-    
-def memorizarevento(event):
-    borrar()
-    Memoria()
 
 def traerdatos():
     with open('datos.csv') as file:
         csv_reader = csv.DictReader(file, delimiter=',')
-        puntos=[]
-        preguntas=[]
-        respuestas=[]
         for row in csv_reader:
             puntos.append(row['punto'])
             preguntas.append(row['pregunta'])
             respuestas.append(row['respuesta'])
-    return puntos,preguntas,respuestas
 
-def Memoria():  
-    puntos1,preguntas1,respuestas1 = traerdatos()
-    ultimopunto = puntos1[-1]
-    puntorandom = random.randint(0,int(ultimopunto))
-    preguntarandom = preguntas1[puntorandom]
-    RespuestaApregunta = respuestas1[puntorandom]
+def GenerarRespuestasRandom():
+    global ResRandom
+    ResRandom = respuestas[random.randint(0,ultimopunto-1)]
+    if ResRandom in RespuestasRandom:
+        GenerarRespuestasRandom()
+    if ResRandom not in RespuestasRandom:
+        return ResRandom           
+ 
+def BotoneraRandom():
+    global ultimopunto
+    ultimopunto = int(puntos[-1])
+    puntorandom = random.randint(0,ultimopunto)
+    global preguntarandom
+    preguntarandom = preguntas[puntorandom - 1]
+    global RespuestaApregunta
+    RespuestaApregunta = respuestas[puntorandom - 1]
+
+    RespuestasRandom.append(RespuestaApregunta)
+    for i in range(4):
+        RespuestasRandom.append(GenerarRespuestasRandom()) 
+    random.shuffle(RespuestasRandom)
+    return RespuestasRandom
     
-    PreguntaLabel = Label(ventana, text = str(preguntarandom),bg="#808080")
+def respuestaevento():
+    if respuestaapretada == RespuestaApregunta:
+        global ResultadoLabel
+        ventana.config(background='#00FF00')
+        ResultadoLabel = Label(ventana, text = 'Correcto',bg="#00FF00")
+        ResultadoLabel.grid(row = 4, column = 8, sticky = W, pady = 30)
+
+    else:
+        ventana.config(background='#FF0000')
+        ResultadoLabel = Label(ventana, text = 'Inorrecto',bg="#FF0000")
+        ResultadoLabel.grid(row = 4, column = 8, sticky = W, pady = 30)
+        
+def respuesta1evento(event):
+    global respuestaapretada
+    respuestaapretada = Res
+    respuestaevento()        
+    #BorrarMemoria()
+    time.sleep(1)
+    ActivarLabelsMemoria()
+    PantallaMemoria()
+    
+def respuesta2evento(event):
+    global respuestaapretada
+    respuestaapretada = Res1
+    respuestaevento()        
+    #BorrarMemoria()
+    time.sleep(1)
+    ActivarLabelsMemoria()
+    PantallaMemoria()
+    
+    
+def respuesta3evento(event):
+    global respuestaapretada
+    respuestaapretada = Res2
+    respuestaevento()        
+    #BorrarMemoria()
+    time.sleep(1)
+    ActivarLabelsMemoria()
+    PantallaMemoria()
+    
+    
+def respuesta4evento(event):
+    global respuestaapretada
+    respuestaapretada = Res3
+    respuestaevento()        
+    #BorrarMemoria()
+    time.sleep(1)
+    ActivarLabelsMemoria()
+    PantallaMemoria()
+    
+    
+def respuesta5evento(event):
+    global respuestaapretada
+    respuestaapretada = Res4
+    respuestaevento()        
+    #BorrarMemoria()
+    time.sleep(1)
+    ActivarLabelsMemoria()
+    PantallaMemoria()
+    
+
+def memorizarevento(event):
+    traerdatos()
+    PantallaMemoria()
+    
+def BorrarMemoria():
+    PreguntaLabel.place_forget()
+    RespuestaLabel.place_forget()
+    Respuesta1Label.place_forget()
+    Respuesta2Label.place_forget()
+    Respuesta3Label.place_forget()
+    Respuesta4Label.place_forget()
+    ResultadoLabel.place_forget()
+    
+def ActivarLabelsMemoria():
+    PreguntaLabel.place()
+    RespuestaLabel.place()
+    Respuesta1Label.place()
+    Respuesta2Label.place()
+    Respuesta3Label.place()
+    Respuesta4Label.place()
+    ResultadoLabel.place()
+
+    
+def PantallaMemoria():
+    borrar()
+    ListaRespuestasRandom = BotoneraRandom()
+    
+    ventana.config(background="#808080")
+    
+    global PreguntaLabel
+    PreguntaLabel = Label(ventana,bg="#808080")
+    PreguntaLabel.configure(text=(str(preguntarandom)))
     PreguntaLabel.grid(row = 0, column = 1, sticky = W, pady = 10)
     
-    ultimarespuesta = puntos1[-1]
-    ListaRespuestasRandom = []
-    ListaDesordenadaRespuestasRandom = []
-    for i in range(4):
-        numerorandom = random.randint(0,int(ultimarespuesta))
-        ListaRespuestasRandom.append(respuestas1[numerorandom])
-    ListaRespuestasRandom.append(RespuestaApregunta)
-    ListaDesordenadaRespuestasRandom = random.shuffle(ListaRespuestasRandom)
-
-    RespuestaLabel = Button(ventana, text = str(ListaDesordenadaRespuestasRandom[0]),bg="#808080")
+    global Res
+    Res = str(ListaRespuestasRandom[0])
+    global RespuestaLabel
+    RespuestaLabel = Button(ventana, text = Res,bg="#808080")
     RespuestaLabel.grid(row = 2, column = 1, sticky = W, pady = 10)   
-
-    Respuesta1Label = Button(ventana, text = str(ListaDesordenadaRespuestasRandom[1]),bg="#808080")
+    RespuestaLabel.bind("<Button>",respuesta1evento)
+        
+    global Res1
+    Res1 = str(ListaRespuestasRandom[1])
+    global Respuesta1Label
+    Respuesta1Label = Button(ventana, text = Res1,bg="#808080")
     Respuesta1Label.grid(row = 2, column = 2, sticky = W, pady = 10)
-    
-    Respuesta2Label = Button(ventana, text = str(ListaDesordenadaRespuestasRandom[2]),bg="#808080")
+    Respuesta1Label.bind("<Button>",respuesta2evento)
+               
+    global Res2              
+    Res2 = str(ListaRespuestasRandom[2])
+    global Respuesta2Label    
+    Respuesta2Label = Button(ventana, text = Res2,bg="#808080")
     Respuesta2Label.grid(row = 2, column = 3, sticky = W, pady = 10)
-    
-    Respuesta3Label = Button(ventana, text = str(ListaDesordenadaRespuestasRandom[3]),bg="#808080")
+    Respuesta2Label.bind("<Button>",respuesta3evento)
+                 
+    global Res3                
+    Res3 = str(ListaRespuestasRandom[3])  
+    global Respuesta3Label
+    Respuesta3Label = Button(ventana, text = Res3,bg="#808080")
     Respuesta3Label.grid(row = 2, column = 4, sticky = W, pady = 10)
-    
-    Respuesta4Label = Button(ventana, text =str(ListaDesordenadaRespuestasRandom[4]),bg="#808080")
+    Respuesta3Label.bind("<Button>",respuesta4evento)
+                
+    global Res4                     
+    Res4 = str(ListaRespuestasRandom[4])  
+    global Respuesta4Label
+    Respuesta4Label = Button(ventana, text =Res4,bg="#808080")
     Respuesta4Label.grid(row = 2, column = 5, sticky = W, pady = 10)
-
+    Respuesta4Label.bind("<Button>",respuesta5evento)
     
-    
-def Inicio():
+def PantallaInicio():
     global PuntoLabel
     PuntoLabel = Label(ventana, text = "Punto:",bg="#808080")
     PuntoLabel.grid(row = 0, column = 0, sticky = W, pady = 2)
@@ -114,5 +232,5 @@ def Inicio():
     botonMemorizar.grid(row = 3, column = 1, sticky = W, pady = 2)
     botonMemorizar.bind("<Button>",memorizarevento)
 
-Inicio()
+PantallaInicio()
 ventana.mainloop()
